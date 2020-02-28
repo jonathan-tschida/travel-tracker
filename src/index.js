@@ -1,13 +1,62 @@
-// This is the JavaScript entry file - your code begins here
-// Do not delete or rename this file ********
-
-// An example of how you import jQuery into a JS file if you use jQuery in that file
 import $ from 'jquery';
-
-// An example of how you tell webpack to use a CSS (SCSS) file
 import './css/base.scss';
+import './images/turing-logo.png';
+import './images/travel-icon.svg';
+import './images/log-in-icon.svg';
+import Agent from './Agent.js';
+import Traveler from './Traveler.js';
 
-// An example of how you tell webpack to use an image (also need to link to it in the index.html)
-import './images/turing-logo.png'
+import DOMUpdate from './domUpdates.js';
 
-console.log('This is the JavaScript entry file - your code begins here.');
+let user;
+let travelersEndPoint = 'https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/travelers/travelers/';
+
+DOMUpdate.popUpLogIn(logIn);
+
+function logIn() {
+  if (validateLogIn()) {
+    let userId = validateUsername();
+    DOMUpdate.closeLogIn();
+    updateTraveler(userId);
+  }
+}
+
+function validateLogIn() {
+  if (!validateUsername()) {
+    alert('user not found');
+    return false;
+  } else if (!validatePassword()) {
+    alert('incorrect password');
+    return false;
+  } else {
+    return true;
+  }
+}
+
+function validatePassword() {
+  let password = $('#password-input').val();
+  return password === 'travel2020';
+}
+
+function validateUsername() {
+  let username = $('#username-input').val();
+  let logInFormat = RegExp('(?<=^traveler)(50$|[1-4][0-9]$|[1-9]$)', 'g');
+  let userId = parseInt(username.match(logInFormat));
+  return username === 'agency' || userId;
+}
+
+function updateTraveler(id) {
+  fetch(travelersEndPoint + id)
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      user = data.message ?
+        new Agent() :
+        new Traveler(data);
+      console.log(user);
+      user instanceof Agent ?
+        DOMUpdate.loadAgentDashboard() :
+        DOMUpdate.loadTravelerDashboard(user);
+    })
+    .catch(error => alert(error.message));
+}
