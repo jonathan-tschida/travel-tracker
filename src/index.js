@@ -3,17 +3,21 @@ import './css/base.scss';
 import './images/turing-logo.png';
 import './images/travel-icon.svg';
 import './images/log-in-icon.svg';
+import Agent from './Agent.js';
+import Traveler from './Traveler.js';
 
 import DOMUpdate from './domUpdates.js';
 
 let user;
 let travelersEndPoint = 'https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/travelers/travelers/';
 
-DOMUpdate.generateLogIn(logIn);
+DOMUpdate.popUpLogIn(logIn);
 
 function logIn() {
   if (validateLogIn()) {
-    alert('Log in clicked');
+    let userId = validateUsername();
+    DOMUpdate.closeLogIn();
+    updateTraveler(userId);
   }
 }
 
@@ -38,8 +42,21 @@ function validateUsername() {
   let username = $('#username-input').val();
   let logInFormat = RegExp('(?<=^traveler)(50$|[1-4][0-9]$|[1-9]$)', 'g');
   let userId = parseInt(username.match(logInFormat));
-  // if (username === 'agency') {
-  //   return 'agent';
-  // }
   return username === 'agency' || userId;
+}
+
+function updateTraveler(id) {
+  fetch(travelersEndPoint + id)
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      user = data.message ?
+        new Agent() :
+        new Traveler(data);
+      console.log(user);
+      user instanceof Agent ?
+        DOMUpdate.loadAgentDashboard() :
+        DOMUpdate.loadTravelerDashboard(user);
+    })
+    .catch(error => alert(error.message));
 }
