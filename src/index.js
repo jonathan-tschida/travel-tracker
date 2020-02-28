@@ -1,15 +1,45 @@
-// This is the JavaScript entry file - your code begins here
-// Do not delete or rename this file ********
-
-// An example of how you import jQuery into a JS file if you use jQuery in that file
 import $ from 'jquery';
-
-// An example of how you tell webpack to use a CSS (SCSS) file
 import './css/base.scss';
-
-// An example of how you tell webpack to use an image (also need to link to it in the index.html)
 import './images/turing-logo.png';
 import './images/travel-icon.svg';
 import './images/log-in-icon.svg';
 
-console.log('This is the JavaScript entry file - your code begins here.');
+import DOMUpdate from './domUpdates.js';
+
+let user;
+let travelersEndPoint = 'https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/travelers/travelers/';
+
+DOMUpdate.generateLogIn(logIn);
+
+function logIn() {
+  if (validateLogIn()) {
+    alert('Log in clicked');
+  }
+}
+
+function validateLogIn() {
+  if (!validateUsername()) {
+    alert('user not found');
+    return false;
+  } else if (!validatePassword()) {
+    alert('incorrect password');
+    return false;
+  } else {
+    return true;
+  }
+}
+
+function validatePassword() {
+  let password = $('#password-input').val();
+  return password === 'travel2020';
+}
+
+function validateUsername() {
+  let username = $('#username-input').val();
+  let logInFormat = RegExp('(?<=^traveler)(50$|[1-4][0-9]$|[1-9]$)', 'g');
+  let userId = parseInt(username.match(logInFormat));
+  // if (username === 'agency') {
+  //   return 'agent';
+  // }
+  return username === 'agency' || userId;
+}
