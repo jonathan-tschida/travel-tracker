@@ -2,6 +2,7 @@
 <html lang="en-US">
   <head>
     <title>Traveltracker</title>
+    <link rel="icon" href="./images/travel-icon.svg">
   </head>
   <body>
     <header>
@@ -9,6 +10,52 @@
       <h1>Traveltracker</h1>
     </header>
     <main>
+      <section class="trips">
+        <h2>Your Trips</h2>
+        <article class="trip-summary">
+          <div class="trip-heading">
+            <img src="https://images.unsplash.com/photo-1489171084589-9b5031ebcf9b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2089&q=80" />
+            <div class="destination-summary">
+              <h3>Lima,</h3>
+              <h3>Peru</h3>
+              <p>Fri 29 Sep 2020</p>
+            </div>
+          </div>
+          <div class="status-summary">
+            <p><span>3</span> travelers</p>
+            <p><span>3</span> days</p>
+            <p class="trip-status pending">Pending</p>
+          </div>
+        </article>
+        <article class="trip-summary">
+          <div class="trip-heading">
+            <img src="https://images.unsplash.com/photo-1489171084589-9b5031ebcf9b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2089&q=80" />
+            <div class="destination-summary">
+              <h3>Santo Domingo,</h3>
+              <h3>Dominican Republic</h3>
+              <p>Fri 29 Sep 2020</p>
+            </div>
+          </div>
+          <div class="status-summary">
+            <p><span>3</span> travelers</p>
+            <p><span>3</span> days</p>
+            <p class="trip-status approved">Approved</p>
+          </div>
+        </article>
+        <h3 class="spending-summary">Yearly Total<span>$100,000.00</span></h3>
+      </section>
+      <form class="new-trip-form">
+        <h2>New Trip</h2>
+        <label for="date-input">Start date:</label>
+        <input id="date-input" type="date" required />
+        <input id="duration-input" type="number" placeholder="Duration of your trip" min=1 step=1 required />
+        <input id="destination-input" list="destinations" placeholder="Your destination" required />
+          <datalist id="destinations">
+          </datalist>
+        <input id="travelers-input" type="number" placeholder="Number of travelers" min=1 step= 1 required />
+        <h3 class="estimated-cost">Estimated Cost<span>$10,000.00</span></h3>
+        <button id="new-trip-button" type="submit" onclick="return false">Submit</button>
+      </form>
     </main>
   </body>
 </html>
