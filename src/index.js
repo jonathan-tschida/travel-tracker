@@ -4,20 +4,22 @@ import './images/turing-logo.png';
 import './images/travel-icon.svg';
 import './images/log-in-icon.svg';
 import Agent from './Agent.js';
+import Destination from './Destination.js';
+import Trip from './Trip.js';
 import Traveler from './Traveler.js';
-
 import DOMUpdate from './domUpdates.js';
 
-let user;
 let travelersEndPoint = 'https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/travelers/travelers/';
+let tripsEndPoint = 'https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/trips/trips';
+let destinationsEndPoint ='https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/destinations/destinations';
 
 DOMUpdate.popUpLogIn(logIn);
 
 function logIn() {
   if (validateLogIn()) {
     let userId = validateUsername();
-    DOMUpdate.closeLogIn();
-    updateTraveler(userId);
+    $('#log-in-button').attr('disabled', true);
+    fetchData(userId);
   }
 }
 
@@ -45,18 +47,103 @@ function validateUsername() {
   return username === 'agency' || userId;
 }
 
-function updateTraveler(id) {
+function fetchData(id) {
+  fetch(destinationsEndPoint)
+    .then(response => response.json())
+    .then(data => {
+      let destinations = data.destinations;
+      fetchTrips(id, destinations);
+    }).catch(error => console.log(error.message));
+}
+
+function fetchTrips(id, destinations) {
+  fetch(tripsEndPoint)
+    .then(response => response.json())
+    .then(data => {
+      let trips = data.trips.map(trip => {
+        let destination = destinations.find(destination => {
+          return destination.id === trip.destinationID
+        });
+        if (destination) {
+          let tripDestination = new Destination(destination);
+          return new Trip(trip, tripDestination);
+        }
+        return {userID: 0};
+      });
+      fetchUser(id, trips);
+    }).catch(error => console.log(error.message));
+}
+
+function fetchUser(id, trips) {
   fetch(travelersEndPoint + id)
     .then(response => response.json())
     .then(data => {
-      console.log(data);
-      user = data.message ?
+      DOMUpdate.user = data.message ?
         new Agent() :
-        new Traveler(data);
-      console.log(user);
-      user instanceof Agent ?
+        new Traveler(data, trips);
+      DOMUpdate.closeLogIn();
+      DOMUpdate.user instanceof Agent ?
         DOMUpdate.loadAgentDashboard() :
-        DOMUpdate.loadTravelerDashboard(user);
-    })
-    .catch(error => alert(error.message));
+        DOMUpdate.loadTravelerDashboard(validateTripRequest);
+    }).catch(error => console.log(error.message));
+}
+
+function validateTripRequest(event) {
+  if(validateFormFilled()) {
+    console.log('not filled');
+    return true;
+  } if (validateDestination()) {
+    console.log('invalid');
+    alert('invalid destination');
+    return false;
+  }
+  submitTripRequest();
+  return false;
+}
+
+function validateFormFilled() {
+  let filled = $('form input').filter(function() {
+        return this.value !== "";
+  }).length !== 4;
+  return filled;
+}
+
+function validateDestination() {
+  let destination = $('#destination-input').val();
+  let destinationExists = Boolean($(`#destinations option[value='${destination}']`).length);
+  return !destinationExists;
+}
+
+function submitTripRequest() {
+  let newTrip = formatTrip(DOMUpdate.plannedTrip);
+  $('#new-trip-button').attr('disabled', true);
+  fetch(tripsEndPoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(newTrip)
+  }).then(response => response.json())
+  .then(data => {
+    if (data.message.includes('success')) {
+      DOMUpdate.user.addTrip(DOMUpdate.plannedTrip);
+      DOMUpdate.loadTravelerDashboard(validateTripRequest);
+    } else {
+      alert(data.message);
+      $('#new-trip-button').attr('disabled', false);
+    }
+  }).catch(error => console.log(error));
+}
+
+function formatTrip({id, userID, destinationID, travelers, date, duration}) {
+  return {
+    "id": id,
+    "userID": userID,
+    "destinationID": destinationID,
+    "travelers": travelers,
+    "date": date,
+    "duration": duration,
+    "status": "pending",
+    "suggestedActivities": []
+  };
 }

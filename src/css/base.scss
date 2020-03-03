@@ -7,11 +7,38 @@ $main-font: Helvetica, Arial, sans-sarif;
   align-items: $align;
 }
 
+@mixin module {
+  background-color: white;
+  padding: 2.5em;
+  border-radius: 5px;
+  box-shadow: 0 0 .7em .1em rgba(0, 0, 0, 0.15);
+  h2 {
+    font-size: 2em;
+  }
+}
+
+@mixin money {
+  font-size: 1.2em;
+  font-weight: bold;
+  span {
+    margin-left: .3em;
+    font-size: 2em;
+    font-weight: bold;
+    color: #078171;
+  }
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: $main-font;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 html,
@@ -20,12 +47,15 @@ body {
 }
 
 header {
+  @include flex(row, space-between, center);
   position: absolute;
   width: 100%;
   z-index: 100;
   background-color: white;
-  @include flex(row, flex-start, center);
   box-shadow: 0 0 .7em 0 rgba(0, 0, 0, .25);
+  div {
+    @include flex(row, flex-start, center);
+  }
   h1 {
     font-size: 2.5em;
     margin: .5em 0em;
@@ -35,27 +65,26 @@ header {
     margin-left: 1em;
     height: 3em;
   }
+  h2 {
+    margin: 0 1em;
+  }
 }
 
 main {
-  @include flex(row, center, center);
+  @include flex(row, center, flex-start);
+  flex-wrap: wrap;
   background-color: #F2F2F2;
-  height: 100%;
-  padding-top: 5.5em;
+  min-height: 100%;
+  padding: 7.5em 0 2.5em 0;
 }
 
 .log-in-form {
   @include flex(column, center, flex-start);
-  background-color: white;
-  padding: 40px;
-  border-radius: 5px;
-  box-shadow: 0 0 .7em .1em rgba(0, 0, 0, 0.15);
-  h2 {
-    font-size: 2em;
-  }
+  @include module;
   input {
     font-size: 1em;
     margin: .5em 0;
+    width: 100%;
     padding: .5em;
     border: .1em #D6D6D6 solid;
     border-radius: .2em;
@@ -83,6 +112,79 @@ main {
       margin-left: .5em;
       object-fit: cover;
       object-position: 0em 0.12em;
+    }
+  }
+}
+
+.new-trip-form {
+  @extend .log-in-form;
+  margin: 0 2em 2em 2em;
+  width: 27em;
+  label {
+    color: #8E8E8E;
+    margin-top: .5em;
+  }
+  input:invalid {
+    color: #8E8E8E;
+  }
+  .estimated-cost {
+    @include money;
+    align-self: flex-end;
+  }
+}
+
+.trips {
+  @include module;
+  @include flex(column, flex-start, flex-start)
+  margin-bottom: 2.5em;
+  width: 27em;
+  img {
+    width: 6em;
+    height: 6em;
+    border-radius: 50%;
+    margin-right: 1em;
+    overflow: hidden;
+  }
+  .spending-summary {
+    @include money;
+    @include flex(row, flex-end, center);
+    width: 100%;
+    padding-top: .5em;
+    margin-top: .5em;
+    border-top: 1px solid darkgrey;
+  }
+}
+
+.trip-summary {
+  @include flex(column, flex-start, flex-start);
+  width: 100%;
+  padding-top: 1em;
+  margin-top: .5em;
+  border-top: 1px solid darkgrey;
+  .destination-summary {
+    h3 {
+      font-size: 1.5em;
+    }
+    p {
+      margin-top: .2em;
+    }
+  }
+  .trip-heading {
+    @include flex(row, flex-start, center);
+  }
+  .status-summary {
+    width: 100%;
+    margin-top: 1em;
+    @include flex(row, space-between, flex-start);
+    span,
+    .trip-status {
+      font-weight: bold;
+    }
+    .approved {
+      color: #34E0A1;
+    }
+    .pending {
+      color: red;
     }
   }
 }
