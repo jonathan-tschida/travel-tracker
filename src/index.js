@@ -114,6 +114,7 @@ function validateDestination() {
 
 function submitTripRequest() {
   let newTrip = formatTrip(DOMUpdate.plannedTrip);
+  $('#new-trip-button').attr('disabled', true);
   fetch(tripsEndPoint, {
     method: "POST",
     headers: {
@@ -125,6 +126,9 @@ function submitTripRequest() {
     if (data.message.includes('success')) {
       DOMUpdate.user.addTrip(DOMUpdate.plannedTrip);
       DOMUpdate.loadTravelerDashboard(validateTripRequest);
+    } else {
+      alert(data.message);
+      $('#new-trip-button').attr('disabled', false);
     }
   }).catch(error => console.log(error));
 }
