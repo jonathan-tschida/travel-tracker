@@ -60,25 +60,27 @@ function fetchTrips(id, destinations) {
   fetch(tripsEndPoint)
     .then(response => response.json())
     .then(data => {
-      let trips = data.trips.filter(trip => trip.userID === id);
-      let userTrips = trips.map(trip => {
+      let trips = data.trips.map(trip => {
         let destination = destinations.find(destination => {
           return destination.id === trip.destinationID
         });
-        let tripDestination = new Destination(destination);
-        return new Trip(trip, tripDestination);
+        if (destination) {
+          let tripDestination = new Destination(destination);
+          return new Trip(trip, tripDestination);
+        }
+        return {userID: 0};
       });
-      fetchUser(id, userTrips);
+      fetchUser(id, trips);
     }).catch(error => console.log(error.message));
 }
 
-function fetchUser(id, userTrips) {
+function fetchUser(id, trips) {
   fetch(travelersEndPoint + id)
     .then(response => response.json())
     .then(data => {
       DOMUpdate.user = data.message ?
         new Agent() :
-        new Traveler(data, userTrips);
+        new Traveler(data, trips);
       DOMUpdate.closeLogIn();
       DOMUpdate.user instanceof Agent ?
         DOMUpdate.loadAgentDashboard() :

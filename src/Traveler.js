@@ -3,11 +3,12 @@ class Traveler {
     this.id = id;
     this.name = name;
     this.type = travelerType;
-    this.trips = this.sortTrips(trips);
+    this.trips = this.filterAndSortTrips(trips);
   }
 
-  sortTrips(trips) {
-    return trips.sort((tripA, tripB) => {
+  filterAndSortTrips(trips) {
+    let filteredTrips = trips.filter(trip => trip.userID === this.id);
+    return filteredTrips.sort((tripA, tripB) => {
       let dateA = new Date(tripA.date);
       let dateB = new Date(tripB.date);
       return dateB - dateA;
