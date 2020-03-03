@@ -7,7 +7,7 @@ $main-font: Helvetica, Arial, sans-sarif;
   align-items: $align;
 }
 
-@mixin module() {
+@mixin module {
   background-color: white;
   padding: 2.5em;
   border-radius: 5px;
@@ -17,7 +17,7 @@ $main-font: Helvetica, Arial, sans-sarif;
   }
 }
 
-@mixin money() {
+@mixin money {
   font-size: 1.2em;
   font-weight: bold;
   span {
@@ -47,12 +47,15 @@ body {
 }
 
 header {
+  @include flex(row, space-between, center);
   position: absolute;
   width: 100%;
   z-index: 100;
   background-color: white;
-  @include flex(row, flex-start, center);
   box-shadow: 0 0 .7em 0 rgba(0, 0, 0, .25);
+  div {
+    @include flex(row, flex-start, center);
+  }
   h1 {
     font-size: 2.5em;
     margin: .5em 0em;
@@ -61,6 +64,9 @@ header {
     margin-top: .5em;
     margin-left: 1em;
     height: 3em;
+  }
+  h2 {
+    margin: 0 1em;
   }
 }
 
@@ -74,7 +80,7 @@ main {
 
 .log-in-form {
   @include flex(column, center, flex-start);
-  @include module();
+  @include module;
   input {
     font-size: 1em;
     margin: .5em 0;
@@ -113,6 +119,7 @@ main {
 .new-trip-form {
   @extend .log-in-form;
   margin: 0 2em 2em 2em;
+  width: 27em;
   label {
     color: #8E8E8E;
     margin-top: .5em;
@@ -121,12 +128,14 @@ main {
     color: #8E8E8E;
   }
   .estimated-cost {
-    @include money();
+    @include money;
+    align-self: flex-end;
   }
 }
 
 .trips {
-  @include module();
+  @include module;
+  @include flex(column, flex-start, flex-start)
   margin-bottom: 2.5em;
   width: 27em;
   img {
@@ -137,7 +146,9 @@ main {
     overflow: hidden;
   }
   .spending-summary {
-    @include money();
+    @include money;
+    @include flex(row, flex-end, center);
+    width: 100%;
     padding-top: .5em;
     margin-top: .5em;
     border-top: 1px solid darkgrey;
@@ -146,6 +157,7 @@ main {
 
 .trip-summary {
   @include flex(column, flex-start, flex-start);
+  width: 100%;
   padding-top: 1em;
   margin-top: .5em;
   border-top: 1px solid darkgrey;
