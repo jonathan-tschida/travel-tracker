@@ -143,12 +143,12 @@ function submitTripRequest() {
 
 function formatTrip({id, userID, destinationID, travelers, date, duration}) {
   return {
-    id: id,
-    userID: userID,
-    destinationID: destinationID,
-    travelers: travelers,
-    date: date,
-    duration: duration,
+    id,
+    userID,
+    destinationID,
+    travelers,
+    date,
+    duration,
     status: "pending",
     suggestedActivities: []
   };
