@@ -25,6 +25,15 @@ class Trip {
     let costWithFee = 1.1 * (airfareCost + lodgingCost);
     return (costWithFee).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
   }
+
+  travelerOnTrip() {
+    let startDate = new Date(this.date);
+    let tripLength = this.duration * 24 * 60 * 60 * 1000;
+    let endDate = new Date(startDate.getTime() + tripLength);
+    let afterStart = new Date() >= startDate;
+    let beforeEnd = new Date() <= endDate;
+    return afterStart && beforeEnd;
+  }
 }
 
 export default Trip;

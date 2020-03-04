@@ -17,10 +17,10 @@ class Traveler {
 
   calculateYearlyCost() {
     let thisYearsTrips = this.trips.filter(trip => {
-      let thisYear = new Date(Date.now()).getFullYear();
+      let thisYear = new Date().getFullYear();
       let tripYear = Number(trip.date.slice(0, 4));
       return thisYear === tripYear;
-    })
+    });
     let yearlyCost = thisYearsTrips.reduce((totalCost, trip) => {
       let cost = trip.estimateCost();
       let parsedCost = Number(cost.replace(/,/g, ''));
@@ -30,7 +30,7 @@ class Traveler {
   }
 
   addTrip(trip) {
-    this.trips = this.sortTrips(this.trips.concat(trip));
+    this.trips = this.filterAndSortTrips(this.trips.concat(trip));
   }
 }
 
