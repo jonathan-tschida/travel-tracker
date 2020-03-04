@@ -10,14 +10,14 @@ import Traveler from './Traveler.js';
 import DOMUpdate from './domUpdates.js';
 
 let travelersEndPoint = 'https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/travelers/travelers/';
-let tripsEndPoint = 'https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/trips/trips';
-let destinationsEndPoint ='https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/destinations/destinations';
+let tripsEndPoint = 'https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/trips/';
+let destinationsEndPoint ='https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/destinations/destinations/';
 
 DOMUpdate.popUpLogIn(logIn);
 
 function logIn() {
   if (validateLogIn()) {
-    let userId = validateUsername();
+    let userId = getUserId();
     $('#log-in-button').attr('disabled', true);
     fetchData(userId);
   }
@@ -42,9 +42,15 @@ function validatePassword() {
 
 function validateUsername() {
   let username = $('#username-input').val();
+  let userId = getUserId();
+  return username === 'agency' || userId;
+}
+
+function getUserId() {
+  let username = $('#username-input').val();
   let logInFormat = RegExp('(?<=^traveler)(50$|[1-4][0-9]$|[1-9]$)', 'g');
   let userId = parseInt(username.match(logInFormat));
-  return username === 'agency' || userId;
+  return userId || '';
 }
 
 function fetchData(id) {
@@ -57,7 +63,7 @@ function fetchData(id) {
 }
 
 function fetchTrips(id, destinations) {
-  fetch(tripsEndPoint)
+  fetch(tripsEndPoint + 'trips')
     .then(response => response.json())
     .then(data => {
       let trips = data.trips.map(trip => {
@@ -78,12 +84,12 @@ function fetchUser(id, trips) {
   fetch(travelersEndPoint + id)
     .then(response => response.json())
     .then(data => {
-      DOMUpdate.user = data.message ?
-        new Agent() :
+      DOMUpdate.user = data.travelers ?
+        new Agent(trips) :
         new Traveler(data, trips);
       DOMUpdate.closeLogIn();
       DOMUpdate.user instanceof Agent ?
-        DOMUpdate.loadAgentDashboard() :
+        DOMUpdate.loadAgentDashboard(buttonHandler) :
         DOMUpdate.loadTravelerDashboard(validateTripRequest);
     }).catch(error => console.log(error.message));
 }
@@ -117,7 +123,7 @@ function validateDestination() {
 function submitTripRequest() {
   let newTrip = formatTrip(DOMUpdate.plannedTrip);
   $('#new-trip-button').attr('disabled', true);
-  fetch(tripsEndPoint, {
+  fetch(tripsEndPoint + 'trips', {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -146,4 +152,92 @@ function formatTrip({id, userID, destinationID, travelers, date, duration}) {
     "status": "pending",
     "suggestedActivities": []
   };
+}
+
+function buttonHandler(event) {
+  if (event.target.classList.contains('approve-button')) {
+    $(event.target).attr('disabled', true);
+    approveTrip(event);
+  } if (event.target.classList.contains('deny-button')) {
+    $(event.target).attr('disabled', true);
+    deleteTrip(event);
+  } if (event.target.classList.contains('search-button')) {
+    $(event.target).attr('disabled', true);
+    searchUsers(event);
+  };
+}
+
+function approveTrip(event) {
+  let tripId = Number(event.target.closest('.trip-summary').id);
+  fetch(tripsEndPoint + 'updateTrip', {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      id: tripId,
+      status: 'approved'
+    })
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.message.includes('modified')) {
+        DOMUpdate.user.approveTrip(tripId);
+        DOMUpdate.handleTripApproval(event);
+      } else {
+        alert(data.message);
+        $(event.target).attr('disabled', false);
+      }
+    }).catch(error => console.log(error.message));
+}
+
+function deleteTrip(event) {
+  let tripId = Number(event.target.closest('.trip-summary').id);
+  fetch(tripsEndPoint + 'trips', {
+    method: 'DELETE',
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      id: tripId
+    })
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.message.includes('deleted')) {
+        DOMUpdate.user.removeTrip(tripId);
+        event.target.closest('.trip-summary').remove();
+      } else {
+        alert(data.message);
+        $(event.target).attr('disabled', false);
+      }
+    }).catch(error => console.log(error.message));
+}
+
+function searchUsers(event) {
+  let user = $('#search-input').val();
+  let userId = Number($(`#traveler-names option[value='${user}']`).attr('data-id'));
+  fetch(destinationsEndPoint)
+    .then(response => response.json())
+    .then(data => {
+      let destinations = data.destinations;
+      fetch(tripsEndPoint + 'trips')
+        .then(response => response.json())
+        .then(data => {
+          let trips = data.trips.map(trip => {
+            let destination = destinations.find(destination => {
+              return destination.id === trip.destinationID
+            });
+            let tripDestination = new Destination(destination);
+            return new Trip(trip, tripDestination);
+          });
+          fetch(travelersEndPoint + userId)
+            .then(response => response.json())
+            .then(data => {
+              let traveler = new Traveler(data, trips);
+              DOMUpdate.loadSearchedTraveler(traveler);
+              $(event.target).attr('disabled', false);
+            }).catch(error => console.log(error.message));
+        }).catch(error => console.log(error.message));
+    }).catch(error => console.log(error.message));
 }
