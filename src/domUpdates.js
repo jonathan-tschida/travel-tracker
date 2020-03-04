@@ -98,7 +98,7 @@ const DOMUpdate = {
   },
 
   fetchDestinations() {
-    let destinationsEndPoint ='https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/destinations/destinations';
+    let destinationsEndPoint = 'https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/destinations/destinations';
     fetch(destinationsEndPoint)
       .then(response => response.json())
       .then(data => {
@@ -107,7 +107,7 @@ const DOMUpdate = {
           let newOption = `<option value='${destination.destination}' data-id='${destination.id}'/>`;
           $('#destinations').append(newOption);
         })
-      }).catch(error => console.log(error));
+      }).catch(error => console.log(error.message));
   },
 
   updateEstimate() {

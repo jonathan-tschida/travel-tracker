@@ -11,7 +11,7 @@ import DOMUpdate from './domUpdates.js';
 
 let travelersEndPoint = 'https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/travelers/travelers/';
 let tripsEndPoint = 'https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/trips/';
-let destinationsEndPoint ='https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/destinations/destinations/';
+let destinationsEndPoint = 'https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/destinations/destinations/';
 
 DOMUpdate.popUpLogIn(logIn);
 
@@ -94,8 +94,8 @@ function fetchUser(id, trips) {
     }).catch(error => console.log(error.message));
 }
 
-function validateTripRequest(event) {
-  if(validateFormFilled()) {
+function validateTripRequest() {
+  if (validateFormFilled()) {
     console.log('not filled');
     return true;
   } if (validateDestination()) {
@@ -143,14 +143,14 @@ function submitTripRequest() {
 
 function formatTrip({id, userID, destinationID, travelers, date, duration}) {
   return {
-    "id": id,
-    "userID": userID,
-    "destinationID": destinationID,
-    "travelers": travelers,
-    "date": date,
-    "duration": duration,
-    "status": "pending",
-    "suggestedActivities": []
+    id: id,
+    userID: userID,
+    destinationID: destinationID,
+    travelers: travelers,
+    date: date,
+    duration: duration,
+    status: "pending",
+    suggestedActivities: []
   };
 }
 
@@ -164,7 +164,7 @@ function buttonHandler(event) {
   } if (event.target.classList.contains('search-button')) {
     $(event.target).attr('disabled', true);
     searchUsers(event);
-  };
+  }
 }
 
 function approveTrip(event) {

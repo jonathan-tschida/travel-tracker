@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 
 import Agent from '../src/Agent.js';
-import Traveler from '../src/Traveler.js';
 import Trip from '../src/Trip.js';
 import Destination from '../src/Destination.js';
 

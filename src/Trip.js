@@ -1,7 +1,7 @@
 class Trip {
   constructor({id, userID, destinationID, travelers, date, duration, status}, destination) {
     this.id = Number(id) || Number(new Date());
-    this.userID = Number(userID) || user.id;
+    this.userID = Number(userID);
     this.destination = destination;
     this.destinationID = destinationID || this.destination.id;
     this.travelers = Number(travelers) || 1;

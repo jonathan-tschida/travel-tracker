@@ -17,7 +17,7 @@ class Agent {
     let yearlyIncome =  paidTripsThisYear.reduce((income, trip) => {
       let tripCost = trip.estimateCost();
       let parsedCost = Number(tripCost.replace(/,/g, ''));
-      let fee = parsedCost * (1/11);
+      let fee = parsedCost * (1 / 11);
       return income + fee;
     }, 0);
     return yearlyIncome.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
