@@ -4,6 +4,7 @@ import Destination from './Destination.js';
 
 const DOMUpdate = {
   user: {},
+  travelers: [],
   destinations: [],
   selectedDestination: {
     destination: '',
@@ -30,11 +31,6 @@ const DOMUpdate = {
     $('.log-in-form').remove();
   },
 
-  loadAgentDashboard() {
-    let agentDashboardHTML = `<h2>Welcome, Agent!</h2>`;
-    $('main').append(agentDashboardHTML);
-  },
-
   loadTravelerDashboard(validateTripRequest) {
     this.updateHeader();
     this.loadMyTrips();
@@ -56,24 +52,28 @@ const DOMUpdate = {
     $('.trips').remove();
     $('main').append(myTripsHTML);
     trips.forEach(trip => {
-      let tripHTML = `<article class="trip-summary">
-        <div class="trip-heading">
-          <img src="${trip.destination.image}" />
-          <div class="destination-summary">
-            <h3>${trip.destination.city},</h3>
-            <h3>${trip.destination.country}</h3>
-            <p>${trip.printDate()}</p>
-          </div>
-        </div>
-        <div class="status-summary">
-          <p><span>${trip.travelers}</span> travelers</p>
-          <p><span>${trip.duration}</span> days</p>
-          <p class="trip-status ${trip.status}">${trip.status}</p>
-        </div>
-      </article>`;
+      let tripHTML = this.generateTripHTML(trip);
       $('.trips').append(tripHTML);
     });
     $('.trips').append(spendingHTML);
+  },
+
+  generateTripHTML(trip) {
+    return `<article class="trip-summary" id=${trip.id}>
+      <div class="trip-heading">
+        <img src="${trip.destination.image}" />
+        <div class="destination-summary">
+          <h3>${trip.destination.city},</h3>
+          <h3>${trip.destination.country}</h3>
+          <p>${trip.printDate()}</p>
+        </div>
+      </div>
+      <div class="status-summary">
+        <p><span>${trip.travelers}</span> travelers</p>
+        <p><span>${trip.duration}</span> days</p>
+        <p class="trip-status ${trip.status}">${trip.status}</p>
+      </div>
+    </article>`;
   },
 
   loadNewTripForm(validateTripRequest) {
@@ -105,7 +105,7 @@ const DOMUpdate = {
         this.destinations = data.destinations;
         data.destinations.forEach(destination => {
           let newOption = `<option value='${destination.destination}' data-id='${destination.id}'/>`;
-          $('datalist').append(newOption);
+          $('#destinations').append(newOption);
         })
       }).catch(error => console.log(error));
   },
@@ -130,6 +130,96 @@ const DOMUpdate = {
     let destination = $('#destination-input').val();
     let ID = $(`#destinations option[value='${destination}']`).attr('data-id') || 0;
     return Number(ID);
+  },
+
+  loadAgentDashboard(buttonHandler) {
+    $('main').click(buttonHandler);
+    this.loadTravelerSearch();
+    this.loadAgentSummary();
+  },
+
+  loadAgentSummary() {
+    let summaryHTML = `<section class="agent-summary">
+      <h2>Summary</h2>
+      <article class="agent-stats">
+        <p>${new Date().getFullYear()} Income<span>${'$' + this.user.calculateYearlyIncome()}</span></p>
+        <p>Today's Travelers<span>${this.user.getTodaysTravelers()}</span></p>
+      </article>
+      <h2>Pending Requests</h2>
+    </section>`;
+    $('.agent-summary').remove();
+    $('main').append(summaryHTML);
+    this.user.filterTrips('pending').forEach(trip => {
+      let tripHTML = this.generateTripHTML(trip);
+      $('.agent-summary').append(tripHTML);
+    });
+    this.addAgentButtons('.agent-summary');
+  },
+
+  addAgentButtons(selector) {
+    let buttonHTML = `<div class="agent-actions">
+      <button class="approve-button">Approve</button>
+      <button class="deny-button">Deny / Delete</button>
+    </div>`;
+    $(`${selector} .trip-summary`).each((index, value) => {
+      let matchingCard = $(value).closest('.trip-summary');
+      let tripStatus = matchingCard.find('.trip-status').text();
+      $(value).append(buttonHTML);
+      if (tripStatus === 'approved') {
+        $(value).find('.approve-button').remove();
+      }
+    });
+  },
+
+  loadTravelerSearch() {
+    let searchHTML = `<section class="traveler-search">
+      <h2>Traveler Search</h2>
+      <form>
+        <input id="search-input" type="search" list="traveler-names" placeholder="Traveler name"/>
+          <datalist id="traveler-names">
+          </datalist>
+        <button class="search-button" type="submit" onclick="return false">Search</button>
+      </form>
+      <div id="search-results">
+      </div>
+    </section>`;
+    $('main').append(searchHTML);
+    this.fetchTravelers();
+  },
+
+  fetchTravelers() {
+    let travelersEndPoint = 'https://fe-apps.herokuapp.com/api/v1/travel-tracker/1911/travelers/travelers/';
+    fetch(travelersEndPoint)
+      .then(response => response.json())
+      .then(data => {
+        this.travelers = data.travelers;
+        this.travelers.forEach(traveler => {
+          let newOption = `<option value='${traveler.name}' data-id='${traveler.id}'/>`;
+          $('#traveler-names').append(newOption);
+        })
+      }).catch(error => console.log(error));
+  },
+
+  handleTripApproval(event) {
+    let matchingCard = $(event.target).closest('.trip-summary');
+    let tripStatus = matchingCard.find('.trip-status');
+    if ($(event.target).parents('.agent-summary').length) {
+      $(matchingCard).remove();
+    } else {
+      $(tripStatus).attr('class', 'approved');
+      $(tripStatus).text('approved');
+      $(matchingCard).find('.approve-button').remove();
+    }
+  },
+
+  loadSearchedTraveler(traveler) {
+    $('#search-results').empty();
+    $('#search-results').append(`<h2 class="searched-name">${traveler.name}</h2>`)
+    traveler.trips.forEach(trip => {
+      let tripHTML = this.generateTripHTML(trip);
+      $('#search-results').append(tripHTML);
+    });
+    this.addAgentButtons('#search-results');
   }
 }
 

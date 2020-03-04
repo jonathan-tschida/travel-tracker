@@ -4,12 +4,14 @@ import Trip from '../src/Trip.js';
 import Destination from '../src/Destination.js';
 
 describe('Trip', function() {
+  let today = new Date();
+  let yesterday = new Date(today - 86400000);
   let tripData = {
     id: 666,
     userID: 49,
     destinationID: 1,
     travelers: 2,
-    date: '2020-03-01',
+    date: yesterday.toISOString().slice(0, 10),
     duration: 7,
     status: 'approved'
   };
@@ -103,10 +105,18 @@ describe('Trip', function() {
   });
 
   it('should be able to make a human readable version of the date', function() {
-    expect(tripA.printDate()).to.equal('Sun Mar 01 2020');
+    expect(tripB.printDate()).to.equal('Sun Mar 01 2020');
   });
 
   it('should be able to give a cost estimate', function() {
     expect(tripA.estimateCost()).to.equal('990.00');
+  });
+
+  it('should be able to tell if a traveler is on the trip', function() {
+    expect(tripA.travelerOnTrip()).to.equal(true);
+  });
+
+  it('should be able to tell if a traveler is NOT on the trip', function() {
+    expect(tripB.travelerOnTrip()).to.equal(false);
   });
 });
